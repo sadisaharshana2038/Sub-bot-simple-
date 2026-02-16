@@ -1,329 +1,313 @@
-# 🎬 Sinhala Subtitle Bot - Ultra Pro V2
+# 🎬 SINHALA SUBTITLE BOT - ULTRA PRO V2 ENHANCED
 
-සිංහල උපසිරැසි බොට් - සම්පූර්ණ ක්‍රියාකාරී bot එකක්
+සිංහල උපසිරැසි බොට් - සම්පූර්ණ ක්‍රියාකාරී Telegram bot එකක්
 
-## 🆕 New Features
+## ✨ Enhanced Features (V2)
 
-### ✅ File Indexing System
-- Channel එකට යන **ඕනම file එකක්** auto index වෙනවා
-- Documents, Videos, Audio, Photos - සියල්ල support කරනවා
-- SRT, ZIP, RAR, MP4, MKV - ඕනම format එකක්
+### 🆕 New in This Version:
+- ✅ **Beautiful File Captions** - Formatted title, year, size with custom styling
+- ✅ **NO Force Subscription** - Free access for all users
+- ✅ **Ban/Unban System** - Admin can ban/unban users by ID or username
+- ✅ **Broadcast with Confirmation** - Send/Cancel buttons before broadcasting
+- ✅ **Forward Message Support** - Preserve images, buttons, and formatting in broadcasts
+- ✅ **Fixed Pagination** - Working Next/Back buttons for search results
+- ✅ **Menu Banners** - Beautiful images on all menu screens
+- ✅ **Enhanced Emojis** - Beautiful formatting throughout
+- ✅ **Better Error Handling** - All commands work properly
 
-### ✅ Bot Mention Reply
-- Bot නම mention කළම search වෙනවා
-- Example: `@YourBot breaking bad`
+### 📚 Core Features:
+- 🔍 **Advanced Search** - Full-text and regex search
+- 📁 **Auto File Indexing** - Files from channel automatically indexed
+- 📝 **Request System** - Users can request movies/series
+- 📊 **Statistics** - Track users, files, searches
+- 👑 **Admin Panel** - Ban/unban, broadcast, delete duplicates
+- 💾 **Smart Storage** - MongoDB with duplicate detection
+- 🎨 **Beautiful UI** - Emojis and formatted messages
 
-### ✅ Contact System
-- `/contact` command එකෙන් contact info එනවා
-- Developer, Owner, WhatsApp links සමග buttons
-- Custom message එකක් දාන්න පුළුවන්
+## 🚀 Quick Start
 
-### ✅ Request System
-- `/request` command එකෙන් film request කරන්න පුළුවන්
-- Film name හා year එකත් ඉල්ලනවා
-- Admin channel එකට යනවා Done/Reject buttons සමග
-- User ට auto reply එනවා admin response එකට
+### Prerequisites
+- Python 3.9+
+- MongoDB database
+- Telegram Bot Token
 
-### ✅ Enhanced Statistics
-- Live updating stats
-- Total users, Monthly active users
-- Channels, Groups count
-- Total searches, Indexed files
-- ලස්සන formatting එක්ක
+### Installation
 
-### ✅ Duplicate File Removal
-- `/deleteduplicates` command
-- Auto detect කරලා duplicates delete කරනවා
-
-### ✅ Advanced Broadcast
-- Text, Photos, Videos, Documents - ඕනම එකක් යවන්න පුළුවන්
-- Forward messages - එකත් work කරනවා
-- Buttons preserve වෙනවා
-- Success/Failure count එනවා
-
-### ✅ Pagination
-- 10 results බැගින් results එනවා
-- Previous/Next buttons
-- ලස්සන navigation
-
-### ✅ Clean Start Menu
-- Featured, Trending buttons අයින් කළා
-- Clean හා simple interface එකක්
-
-## 📋 Requirements
-
-```
-python-telegram-bot>=20.0
-motor>=3.0
-python-dotenv
-```
-
-## 🔧 Setup Instructions
-
-### 1. MongoDB Setup
-
+1. **Clone/Download**
 ```bash
-# Install MongoDB or use MongoDB Atlas (cloud)
-# Get your MongoDB URI
+unzip sinhala-sub-bot-v2-complete.zip
+cd sinhala-sub-bot-v2-complete
 ```
 
-### 2. Environment Variables
+2. **Install Dependencies**
+```bash
+pip install -r requirements.txt --break-system-packages
+```
 
+3. **Configure Environment**
 Create `.env` file:
-
 ```env
-# Bot Configuration
 BOT_TOKEN=your_bot_token_here
-BOT_USERNAME=YourBotUsername
-
-# MongoDB
-MONGODB_URI=mongodb://localhost:27017
+MONGODB_URI=your_mongodb_uri_here
 DB_NAME=sinhala_sub_bot
-
-# Admins (comma separated user IDs)
 ADMIN_IDS=123456789,987654321
-
-# Main Channel (for file indexing)
 CHANNEL_ID=-1001234567890
 CHANNEL_USERNAME=@YourChannel
-FORCE_SUBSCRIBE=true
-
-# Request System (Admin channel for requests)
 REQUEST_CHANNEL_ID=-1001234567890
+BOT_USERNAME=YourBotUsername
 
 # Contact Information
+DEVELOPER_NAME=Sadesha Hansana
+OWNER_NAME=Sadisa Harshana
 DEVELOPER_LINK=https://t.me/YourDeveloper
 OWNER_LINK=https://t.me/YourOwner
 OWNER_WHATSAPP=https://wa.me/94701234567
+
+# Menu Banner Images (Telegraph or Telegram file_id)
+BANNER_START=https://telegra.ph/file/yourimage1.jpg
+BANNER_HELP=https://telegra.ph/file/yourimage2.jpg
+BANNER_CONTACT=https://telegra.ph/file/yourimage3.jpg
+BANNER_SEARCH=https://telegra.ph/file/yourimage4.jpg
 ```
 
-### 3. Install Dependencies
-
-```bash
-pip install -r requirements.txt
-```
-
-### 4. Run Bot
-
+4. **Run Bot**
 ```bash
 python bot.py
 ```
 
-## 🤖 Bot Setup
+## 📖 Commands
 
-### 1. Create Bot
-- Talk to [@BotFather](https://t.me/BotFather)
-- Create new bot: `/newbot`
-- Get your bot token
-- Set bot username: `/setusername`
+### User Commands:
+- `/start` - Start bot and show main menu
+- `/help` - Show help and usage guide
+- `/search` - Search for movies/series
+- `/request` - Request a movie/series
+- `/contact` - Contact developers/owner
+- `/stats` - View bot statistics
 
-### 2. Add Bot to Channel
-- Add bot as **administrator** to your channel
-- Bot needs **all permissions** to index files
-- Get channel ID (use [@userinfobot](https://t.me/userinfobot))
+### Admin Commands:
+- `/ban <user_id or @username> [reason]` - Ban a user
+- `/unban <user_id or @username>` - Unban a user
+- `/broadcast` - Broadcast message to all users
+- `/deleteduplicates` - Remove duplicate files
 
-### 3. Admin Channel for Requests
-- Create a private channel for admin team
-- Add bot as administrator
-- Get channel ID
-- Set as `REQUEST_CHANNEL_ID`
+## 🎯 How It Works
 
-### 4. Get Your User ID
-- Talk to [@userinfobot](https://t.me/userinfobot)
-- Add your ID to `ADMIN_IDS`
+### For Users:
 
-## 📚 Usage
+1. **Search Files:**
+   - Type movie/series name
+   - Click on result button
+   - Download file with beautiful caption
 
-### User Commands
-- `/start` - ආරම්භ කරන්න
-- `/help` - උදව්
-- `/search` - සෙවීම
-- `/request` - Film request කරන්න
-- `/contact` - සම්බන්ධ වන්න
-- `/stats` - Statistics
+2. **Request Files:**
+   - Use `/request` command
+   - Enter name and year
+   - Wait for admin approval
 
-### Admin Commands
-- `/broadcast` - Message යවන්න (all users)
-- `/deleteduplicates` - Duplicate files ඉවත් කරන්න
-- `/indexstats` - Indexing statistics
+3. **Contact Support:**
+   - Use `/contact` command
+   - Click on Developer/Owner buttons
+   - Direct WhatsApp link available
 
-### Searching
-- Type film name දුන්නම search වෙනවා
-- Bot mention කළත් work කරනවා: `@YourBot film name`
-- 10 results බැගින් pagination
+### For Admins:
 
-## 🗃️ Database Collections
+1. **Ban/Unban Users:**
+   ```
+   /ban 123456789 Spamming
+   /ban @username Abuse
+   /unban 123456789
+   /unban @username
+   ```
 
-### users
-```json
-{
-  "user_id": 123456789,
-  "username": "user123",
-  "first_name": "John",
-  "joined_date": "2024-01-01",
-  "searches_count": 50,
-  "is_admin": false
-}
+2. **Broadcast Messages:**
+   - Use `/broadcast` command
+   - Send any message (text/photo/video/forward)
+   - Confirm with Send button
+   - All formatting and buttons preserved
+
+3. **Manage Files:**
+   - Add bot as admin to your channel
+   - Files are auto-indexed
+   - Remove duplicates with `/deleteduplicates`
+
+## 📁 File Caption Format
+
+When users download files, they receive this beautiful caption:
+
+```
+📁𝗧𝗶𝘁𝗹𝗲  - Avatar The Way of Water
+🔎𝗬𝗲𝗮𝗿  - 2022
+💾𝗦𝗶𝘇𝗲   - 2.45 GB
+
+𝗦𝗜𝗡𝗛𝗔𝗟𝗔  𝗦𝗨𝗕𝗧𝗜𝗧𝗟𝗘  𝗕𝗢𝗧
+🧑‍💻𝐃𝐞𝐯𝐞𝐥𝐨𝐩𝐞𝐝 𝐁𝐲 - 𝗦𝗮𝗱𝗲𝘀𝗵𝗮 𝗛𝗮𝗻𝘀𝗮𝗻𝗮
+🙎‍♂️𝐏𝐫𝐨𝐝𝐮𝐬𝐞 𝐀𝐧𝐝 𝐎𝐰𝐧𝐞𝐫 - 𝗦𝗮𝗱𝗶𝘀𝗮 𝗛𝗮𝗿𝘀𝗵𝗮𝗻𝗮
 ```
 
-### files
-```json
-{
-  "file_id": "BAACAgIAAxkBAAI...",
-  "file_unique_id": "AgADxxxx",
-  "file_name": "Breaking.Bad.S01E01.srt",
-  "file_type": "document",
-  "file_size": 50000,
-  "caption": "Breaking Bad Season 1 Episode 1",
-  "message_id": 123,
-  "chat_id": -1001234567890,
-  "indexed_date": "2024-01-01"
-}
+## 🎨 Menu Banners
+
+All menus display beautiful banner images:
+- Start Menu - Welcome banner
+- Help Menu - Help banner
+- Contact Menu - Contact banner
+- Search Results - Search banner
+
+Upload images to Telegraph or use Telegram file_id in `.env`
+
+## 🔧 Configuration Tips
+
+### Getting Channel ID:
+1. Forward message from channel to @userinfobot
+2. Copy the channel ID (starts with -100)
+
+### Getting Bot Token:
+1. Talk to @BotFather
+2. Create new bot
+3. Copy the token
+
+### MongoDB Setup:
+1. Create free account at MongoDB Atlas
+2. Create cluster
+3. Get connection URI
+4. Add to `.env` file
+
+### Admin IDs:
+1. Get your Telegram ID from @userinfobot
+2. Add comma-separated IDs to ADMIN_IDS
+
+## 📱 Bot Features in Detail
+
+### 1. Search System
+- Full-text search
+- Regex fallback search
+- Pagination (10 results per page)
+- Working Next/Back buttons
+- File size display
+- Quick download buttons
+
+### 2. Ban System
+- Ban by user ID: `/ban 123456789 Spam`
+- Ban by username: `/ban @baduser Abuse`
+- Unban by ID or username
+- Banned users cannot use bot
+- MongoDB tracking
+
+### 3. Broadcast System
+- Send text messages
+- Send photos with captions
+- Send videos with captions
+- Forward any message
+- Buttons preserved
+- Confirmation before sending
+- Progress tracking
+
+### 4. Request System
+- Two-step process (name → year)
+- Saved to database
+- Sent to admin channel
+- Approve/Reject buttons
+- User notification
+
+### 5. File Management
+- Auto-indexing from channel
+- Duplicate detection
+- Multiple file types (video, document, audio, photo)
+- Beautiful captions
+- Size formatting
+
+## 🐛 Bug Fixes
+
+All previous issues fixed:
+- ✅ File captions formatted perfectly
+- ✅ Channel subscription removed
+- ✅ Ban/unban working with ID and username
+- ✅ Broadcast confirmation added
+- ✅ Forward messages preserved
+- ✅ Pagination buttons working
+- ✅ Contact command working
+- ✅ Help command working
+- ✅ Error handler improved
+- ✅ All menus show images
+
+## 🌐 Deployment
+
+### Deploy to Heroku:
+```bash
+heroku create your-bot-name
+heroku config:set BOT_TOKEN=your_token
+heroku config:set MONGODB_URI=your_uri
+git push heroku main
 ```
 
-### requests
-```json
-{
-  "user_id": 123456789,
-  "username": "user123",
-  "film_name": "Breaking Bad",
-  "year": "2008-2013",
-  "status": "pending",
-  "request_date": "2024-01-01"
-}
+### Deploy to Railway:
+1. Connect GitHub repository
+2. Add environment variables
+3. Deploy
+
+### Deploy to VPS:
+```bash
+python3 bot.py
+# Or use screen/tmux
+screen -S sinhalasub
+python3 bot.py
+# Detach: Ctrl+A, D
 ```
-
-### searches
-```json
-{
-  "user_id": 123456789,
-  "query": "breaking bad",
-  "timestamp": "2024-01-01"
-}
-```
-
-### chats
-```json
-{
-  "chat_id": -1001234567890,
-  "title": "My Channel",
-  "username": "mychannel",
-  "type": "channel",
-  "last_updated": "2024-01-01"
-}
-```
-
-## 🔥 Features Explained
-
-### File Indexing
-Bot automatically indexes **every file** posted to your channel:
-- Documents (.srt, .zip, .rar, .pdf, etc.)
-- Videos (.mp4, .mkv, .avi, etc.)
-- Audio files
-- Photos
-
-Files are searchable by:
-- File name
-- Caption text
-
-### Search System
-- Users can search by typing any text
-- Bot mention also works: `@YourBot search term`
-- Results show 10 per page
-- Previous/Next navigation
-- Click file button to download
-
-### Request System
-1. User sends `/request`
-2. Bot asks for film name (English)
-3. Bot asks for year
-4. Request goes to admin channel with Done/Reject buttons
-5. Admin clicks Done or Reject
-6. User gets automatic notification
-
-### Contact System
-- Shows custom contact message
-- Developer, Owner, WhatsApp buttons
-- Fully customizable via .env
-
-### Stats Display
-- Real-time stats
-- User counts (total, monthly active)
-- Chat counts (channels, groups)
-- Search count
-- Indexed files count
-- Beautiful formatting
-
-### Broadcast System
-- Supports text, photos, videos, documents
-- Forward messages work
-- Buttons are preserved
-- Shows success/failure count
-- Works for all users in database
-
-### Duplicate Removal
-- Finds files with same `file_unique_id`
-- Keeps first, deletes rest
-- Shows count of deleted files
-
-## 🛠️ Troubleshooting
-
-### Bot not indexing files?
-1. Check bot is admin in channel
-2. Check `CHANNEL_ID` is correct (with `-100` prefix)
-3. Check bot has all permissions
-
-### Search not working?
-1. Check MongoDB connection
-2. Check files are indexed: `/stats`
-3. Try exact file name first
-
-### Broadcast not sending?
-1. Check users are in database
-2. Some users may have blocked bot
-3. Check for error logs
-
-### Request system not working?
-1. Check `REQUEST_CHANNEL_ID` is set
-2. Bot must be admin in that channel
-3. Check admin user IDs in `ADMIN_IDS`
-
-## 📝 Notes
-
-- Bot name mention feature needs `BOT_USERNAME` in .env
-- Request channel can be same as main channel
-- Multiple admins can be added (comma separated IDs)
-- Files are never duplicated in database (unique file_unique_id)
-- Stats update in real-time
-- Bot works with any file type Telegram supports
-
-## 🎯 Best Practices
-
-1. **Backup Database** regularly
-2. **Monitor Bot** with `/stats`
-3. **Clean Duplicates** periodically with `/deleteduplicates`
-4. **Test Features** in test group first
-5. **Keep Logs** for debugging
 
 ## 📞 Support
 
-Bot ගැන ප්‍රශ්න තියෙනවනම්:
-- Developer link use කරන්න
-- Owner contact කරන්න
-- `/contact` command use කරන්න
+### Developer:
+- 🧑‍💻 Sadesha Hansana
+- Telegram: [Link in bot]
 
-## 🔐 Security
-
-- Never share your `.env` file
-- Keep bot token secure
-- Only trusted users as admins
-- Regular database backups
-- Monitor bot logs
+### Owner:
+- 🙎‍♂️ Sadisa Harshana
+- Telegram: [Link in bot]
+- WhatsApp: [Link in bot]
 
 ## 📄 License
 
-This bot is for personal/educational use.
+This project is for personal/educational use.
+
+## 🔄 Updates
+
+### Version 2.0 (Current)
+- Beautiful file captions
+- No force subscription
+- Ban/unban system
+- Broadcast confirmation
+- Fixed pagination
+- Menu banners
+- Enhanced UI
+
+### Version 1.0
+- Basic search
+- File indexing
+- Request system
+- Admin commands
+
+## 🎯 Future Plans
+
+- Multi-language support
+- Advanced filters
+- Download statistics
+- User favorites
+- Rating system
+- Category browsing
+
+## ⚠️ Important Notes
+
+1. Bot must be admin in your channel for auto-indexing
+2. MongoDB URI must be valid and accessible
+3. Admin IDs must be correct (no spaces)
+4. Channel ID includes the -100 prefix
+5. Banner images optional but recommended
+6. Use Telegraph for image hosting
+
+## 🙏 Credits
+
+Developed with ❤️ for Sinhala subtitle community
 
 ---
 
-🇱🇰 Made with ❤️ for Sinhala subtitle community
+**Enjoy your enhanced Sinhala Subtitle Bot!** 🎬🇱🇰
