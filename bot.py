@@ -33,27 +33,27 @@ load_dotenv()
 # CONFIGURATION
 # ============================================
 
-BOT_TOKEN = os.getenv('BOT_TOKEN', '8502581099:AAHaEU3igT71rRs4NHShTNgcb-6FxmoQXe8')
-MONGODB_URI = os.getenv('MONGODB_URI', 'mongodb+srv://Sadisa:JRGgclOXbm5KLiHn@cluster0.vexxjgb.mongodb.net/')
+BOT_TOKEN = os.getenv('BOT_TOKEN')
+MONGODB_URI = os.getenv('MONGODB_URI')
 DB_NAME = os.getenv('DB_NAME', 'sinhala_sub_bot')
-ADMIN_IDS = [int(x) for x in os.getenv('ADMIN_IDS', '8107411538,7001801397').split(',') if x]
-CHANNEL_ID = os.getenv('CHANNEL_ID', '-1003839839205')  # Main channel for file indexing
+ADMIN_IDS = [int(x) for x in os.getenv('ADMIN_IDS', '').split(',') if x]
+CHANNEL_ID = os.getenv('CHANNEL_ID', '')  # Main channel for file indexing
 CHANNEL_USERNAME = os.getenv('CHANNEL_USERNAME', '@YourChannel')
 FORCE_SUBSCRIBE = False  # Force subscription disabled
-REQUEST_CHANNEL_ID = os.getenv('REQUEST_CHANNEL_ID', '-1003715480267')  # Admin channel for requests
-BOT_USERNAME = os.getenv('BOT_USERNAME', '@MySubTest1_bot')
+REQUEST_CHANNEL_ID = os.getenv('REQUEST_CHANNEL_ID', '')  # Admin channel for requests
+BOT_USERNAME = os.getenv('BOT_USERNAME', 'YourBot')
 
 # Contact info
 DEVELOPER_NAME = os.getenv('DEVELOPER_NAME', 'Sadesha Hansana')
 OWNER_NAME = os.getenv('OWNER_NAME', 'Sadisa Harshana')
-DEVELOPER_LINK = os.getenv('DEVELOPER_LINK', 'https://t.me/SadeshaHansana2')
-OWNER_LINK = os.getenv('OWNER_LINK', 'https://t.me/sljohnwick')
+DEVELOPER_LINK = os.getenv('DEVELOPER_LINK', 'https://t.me/YourDeveloper')
+OWNER_LINK = os.getenv('OWNER_LINK', 'https://t.me/YourOwner')
 OWNER_WHATSAPP = os.getenv('OWNER_WHATSAPP', 'https://wa.me/94701234567')
 
 # Menu Banner Images - Upload images to Telegram and use file_id or Telegraph URLs
-BANNER_START = os.getenv('BANNER_START', 'https://t.me/shprofilterupdate/300')
-BANNER_HELP = os.getenv('BANNER_HELP', 'https://t.me/shprofilterupdate/301')
-BANNER_CONTACT = os.getenv('BANNER_CONTACT', 'https://t.me/shprofilterupdate/300')
+BANNER_START = os.getenv('BANNER_START', 'https://telegra.ph/file/d4f3e965e965e3dfb5b45.jpg')
+BANNER_HELP = os.getenv('BANNER_HELP', 'https://telegra.ph/file/d4f3e965e965e3dfb5b45.jpg')
+BANNER_CONTACT = os.getenv('BANNER_CONTACT', 'https://telegra.ph/file/d4f3e965e965e3dfb5b45.jpg')
 BANNER_SEARCH = os.getenv('BANNER_SEARCH', 'https://telegra.ph/file/d4f3e965e965e3dfb5b45.jpg')
 
 # Emojis
@@ -103,15 +103,27 @@ class Database:
     
     async def _create_indexes(self):
         """Create database indexes"""
-        await self.db.users.create_index("user_id", unique=True)
-        await self.db.files.create_index("file_id", unique=True)
-        await self.db.files.create_index("file_unique_id", unique=True)
-        await self.db.files.create_index([("file_name", "text"), ("caption", "text")])
-        await self.db.searches.create_index("user_id")
-        await self.db.searches.create_index("timestamp")
-        await self.db.requests.create_index("user_id")
-        await self.db.requests.create_index("status")
-        await self.db.banned_users.create_index("user_id", unique=True)
+        try:
+            await self.db.users.create_index("user_id", unique=True)
+            await self.db.files.create_index("file_id", unique=True)
+            await self.db.files.create_index("file_unique_id", unique=True)
+            
+            # Try to create text index, but don't fail if it already exists
+            try:
+                await self.db.files.create_index([("file_name", "text"), ("caption", "text")])
+            except Exception as text_index_error:
+                logger.debug(f"Text index creation note: {text_index_error}")
+            
+            # Create other indexes
+            await self.db.searches.create_index("user_id")
+            await self.db.searches.create_index("timestamp")
+            await self.db.requests.create_index("user_id")
+            await self.db.requests.create_index("status")
+            await self.db.banned_users.create_index("user_id", unique=True)
+            
+            logger.info("✅ Database indexes created/verified")
+        except Exception as e:
+            logger.error(f"Error creating indexes: {e}")
     
     async def disconnect(self):
         if self.client:
@@ -748,41 +760,67 @@ async def message_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await save_user(user)
     
     # Save search query
-    await db.db.searches.insert_one({
-        'user_id': user.id,
-        'query': query,
-        'timestamp': datetime.now()
-    })
-    
-    # Update user search count
-    await db.db.users.update_one(
-        {'user_id': user.id},
-        {'$inc': {'searches_count': 1}}
-    )
+    try:
+        await db.db.searches.insert_one({
+            'user_id': user.id,
+            'query': query,
+            'timestamp': datetime.now()
+        })
+        
+        # Update user search count
+        await db.db.users.update_one(
+            {'user_id': user.id},
+            {'$inc': {'searches_count': 1}}
+        )
+    except Exception as e:
+        logger.error(f"Error saving search: {e}")
     
     # Search files
     try:
-        search_results = await db.db.files.find(
-            {'$text': {'$search': query}}
-        ).limit(50).to_list(50)
+        # Show searching message
+        search_msg = await update.message.reply_text(
+            f"{E['loading']} **සොයමින්...**",
+            parse_mode='Markdown'
+        )
         
+        search_results = []
+        
+        # Try text search first (if index exists)
+        try:
+            search_results = await db.db.files.find(
+                {'$text': {'$search': query}}
+            ).limit(50).to_list(50)
+        except Exception as text_search_error:
+            logger.debug(f"Text search not available: {text_search_error}")
+        
+        # If no results, try regex search as fallback
         if not search_results:
-            # Try regex search as fallback
-            search_results = await db.db.files.find({
-                '$or': [
-                    {'file_name': {'$regex': query, '$options': 'i'}},
-                    {'caption': {'$regex': query, '$options': 'i'}}
-                ]
-            }).limit(50).to_list(50)
+            try:
+                search_results = await db.db.files.find({
+                    '$or': [
+                        {'file_name': {'$regex': query, '$options': 'i'}},
+                        {'caption': {'$regex': query, '$options': 'i'}}
+                    ]
+                }).limit(50).to_list(50)
+            except Exception as regex_error:
+                logger.error(f"Regex search failed: {regex_error}")
+        
+        # Delete searching message
+        try:
+            await search_msg.delete()
+        except:
+            pass
         
         if not search_results:
             await update.message.reply_text(
                 f"{E['search']} **සෙවුම: \"{query}\"**\n\n"
                 f"{E['error']} ප්‍රතිඵල හමු නොවීය!\n\n"
+                f"━━━━━━━━━━━━━━━━━━━━━━━━━━\n"
                 f"💡 **උපදෙස්:**\n"
                 f"• වෙනත් නමකින් උත්සාහ කරන්න\n"
                 f"• Spelling පරීක්ෂා කරන්න\n"
-                f"• /request භාවිතයෙන් ඉල්ලීමක් කරන්න",
+                f"• /request භාවිතයෙන් ඉල්ලීමක් කරන්න\n"
+                f"━━━━━━━━━━━━━━━━━━━━━━━━━━",
                 parse_mode='Markdown'
             )
             return
@@ -796,9 +834,15 @@ async def message_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await send_search_results_page(update, context, 0)
         
     except Exception as e:
-        logger.error(f"Error in search: {e}")
+        logger.error(f"Error in search: {e}", exc_info=True)
         await update.message.reply_text(
-            f"{E['error']} සෙවීමේදී දෝෂයක්!\n\nකරුණාකර නැවත උත්සාහ කරන්න."
+            f"{E['error']} **සෙවීමේදී දෝෂයක්!**\n\n"
+            f"Error: `{str(e)}`\n\n"
+            f"කරුණාකර:\n"
+            f"• Database connection පරීක්ෂා කරන්න\n"
+            f"• Admin හා සම්බන්ධ වන්න\n"
+            f"• /contact",
+            parse_mode='Markdown'
         )
 
 async def send_search_results_page(update: Update, context: ContextTypes.DEFAULT_TYPE, page: int):
@@ -807,6 +851,28 @@ async def send_search_results_page(update: Update, context: ContextTypes.DEFAULT
     query = context.user_data.get('search_query', '')
     
     if not results:
+        text = f"{E['error']} **ප්‍රතිඵල නැත!**\n\nකරුණාකර නැවත සොයන්න."
+        keyboard = [[InlineKeyboardButton(f"{E['home']} මුල් පිටුව", callback_data="start")]]
+        
+        if update.callback_query:
+            try:
+                await update.callback_query.edit_message_text(
+                    text,
+                    reply_markup=InlineKeyboardMarkup(keyboard),
+                    parse_mode='Markdown'
+                )
+            except:
+                await update.callback_query.message.reply_text(
+                    text,
+                    reply_markup=InlineKeyboardMarkup(keyboard),
+                    parse_mode='Markdown'
+                )
+        else:
+            await update.message.reply_text(
+                text,
+                reply_markup=InlineKeyboardMarkup(keyboard),
+                parse_mode='Markdown'
+            )
         return
     
     # Pagination
@@ -820,22 +886,26 @@ async def send_search_results_page(update: Update, context: ContextTypes.DEFAULT
     
     # Create result message
     text = f"""
-{E['search']} **සෙවුම්: \"{query}\"**
+╔═══════════════════════════╗
+║   {E['search']} 𝗦𝗘𝗔𝗥𝗖𝗛 𝗥𝗘𝗦𝗨𝗟𝗧𝗦   ║
+╚═══════════════════════════╝
 
+🔍 **සෙවුම්: "{query}"**
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━
 {E['success']} **ප්‍රතිඵල: {len(results)}**
-📄 පිටුව {page + 1}/{total_pages}
-
+📄 **පිටුව: {page + 1}/{total_pages}**
 ━━━━━━━━━━━━━━━━━━━━━━━━━━
 """
     
     # Create buttons
     keyboard = []
     for idx, file_data in enumerate(page_results):
-        file_name = file_data['file_name']
+        file_name = file_data.get('file_name', 'Unknown')
         file_size = format_file_size(file_data.get('file_size', 0))
         
         # Truncate long names
-        display_name = file_name if len(file_name) <= 50 else file_name[:47] + "..."
+        display_name = file_name if len(file_name) <= 45 else file_name[:42] + "..."
         
         button_text = f"📁 {display_name} ({file_size})"
         keyboard.append([InlineKeyboardButton(button_text, callback_data=f"file_{file_data['file_id']}")])
@@ -843,11 +913,14 @@ async def send_search_results_page(update: Update, context: ContextTypes.DEFAULT
     # Navigation buttons
     nav_buttons = []
     if page > 0:
-        nav_buttons.append(InlineKeyboardButton(f"{E['back']} Previous", callback_data=f"page_{page-1}"))
-    if page < total_pages - 1:
-        nav_buttons.append(InlineKeyboardButton(f"Next ➡️", callback_data=f"page_{page+1}"))
+        nav_buttons.append(InlineKeyboardButton(f"⬅️ පෙර", callback_data=f"page_{page-1}"))
     
-    if nav_buttons:
+    nav_buttons.append(InlineKeyboardButton(f"📄 {page + 1}/{total_pages}", callback_data="current_page"))
+    
+    if page < total_pages - 1:
+        nav_buttons.append(InlineKeyboardButton(f"ඊළඟ ➡️", callback_data=f"page_{page+1}"))
+    
+    if len(nav_buttons) > 0:
         keyboard.append(nav_buttons)
     
     keyboard.append([InlineKeyboardButton(f"{E['home']} මුල් පිටුව", callback_data="start")])
@@ -864,11 +937,14 @@ async def send_search_results_page(update: Update, context: ContextTypes.DEFAULT
             )
         except Exception as e:
             logger.error(f"Error editing message: {e}")
-            await update.callback_query.message.reply_text(
-                text,
-                reply_markup=reply_markup,
-                parse_mode='Markdown'
-            )
+            try:
+                await update.callback_query.message.reply_text(
+                    text,
+                    reply_markup=reply_markup,
+                    parse_mode='Markdown'
+                )
+            except:
+                pass
     else:
         await update.message.reply_text(
             text,
@@ -975,6 +1051,10 @@ Movie හෝ Series නම ටයිප් කරන්න...
             context.user_data['current_page'] = page
             await send_search_results_page(update, context, page)
         
+        elif data == "current_page":
+            # Just answer the callback, don't do anything
+            await query.answer(f"📄 පිටුව {context.user_data.get('current_page', 0) + 1}")
+        
         elif data.startswith("file_"):
             file_id = data.replace("file_", "")
             await send_file(update, context, file_id)
@@ -1017,45 +1097,71 @@ async def send_file(update: Update, context: ContextTypes.DEFAULT_TYPE, file_id:
             return
         
         # Create beautiful caption
-        caption = create_file_caption(file_data['file_name'], file_data.get('file_size', 0))
+        caption = create_file_caption(
+            file_data.get('file_name', 'Unknown'),
+            file_data.get('file_size', 0)
+        )
         
         # Send file
         await query.answer(f"{E['loading']} Sending file...")
         
-        file_type = file_data['file_type']
+        file_type = file_data.get('file_type', 'document')
         
-        if file_type == 'document':
-            await context.bot.send_document(
-                chat_id=query.message.chat_id,
-                document=file_id,
-                caption=caption,
-                parse_mode='Markdown'
-            )
-        elif file_type == 'video':
-            await context.bot.send_video(
-                chat_id=query.message.chat_id,
-                video=file_id,
-                caption=caption,
-                parse_mode='Markdown'
-            )
-        elif file_type == 'audio':
-            await context.bot.send_audio(
-                chat_id=query.message.chat_id,
-                audio=file_id,
-                caption=caption,
-                parse_mode='Markdown'
-            )
-        elif file_type == 'photo':
-            await context.bot.send_photo(
-                chat_id=query.message.chat_id,
-                photo=file_id,
-                caption=caption,
+        try:
+            if file_type == 'document':
+                await context.bot.send_document(
+                    chat_id=query.message.chat_id,
+                    document=file_id,
+                    caption=caption,
+                    parse_mode='Markdown'
+                )
+            elif file_type == 'video':
+                await context.bot.send_video(
+                    chat_id=query.message.chat_id,
+                    video=file_id,
+                    caption=caption,
+                    parse_mode='Markdown'
+                )
+            elif file_type == 'audio':
+                await context.bot.send_audio(
+                    chat_id=query.message.chat_id,
+                    audio=file_id,
+                    caption=caption,
+                    parse_mode='Markdown'
+                )
+            elif file_type == 'photo':
+                await context.bot.send_photo(
+                    chat_id=query.message.chat_id,
+                    photo=file_id,
+                    caption=caption,
+                    parse_mode='Markdown'
+                )
+            else:
+                # Default to document if type unknown
+                await context.bot.send_document(
+                    chat_id=query.message.chat_id,
+                    document=file_id,
+                    caption=caption,
+                    parse_mode='Markdown'
+                )
+            
+            logger.info(f"File sent: {file_data.get('file_name')} to user {query.from_user.id}")
+            
+        except Exception as send_error:
+            logger.error(f"Error sending file: {send_error}")
+            await query.message.reply_text(
+                f"{E['error']} **File එක යැවීමේදී දෝෂයක්!**\n\n"
+                f"කරුණාකර admin හා සම්බන්ධ වන්න.\n"
+                f"/contact",
                 parse_mode='Markdown'
             )
         
     except Exception as e:
-        logger.error(f"Error sending file: {e}")
-        await query.answer(f"{E['error']} Error sending file!", show_alert=True)
+        logger.error(f"Error in send_file: {e}", exc_info=True)
+        try:
+            await query.answer(f"{E['error']} Error!", show_alert=True)
+        except:
+            pass
 
 # ============================================
 # REQUEST SYSTEM
@@ -1564,7 +1670,7 @@ def main():
     app.add_handler(broadcast_conv)
     app.add_handler(CallbackQueryHandler(button_callback))
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, message_handler))
-    app.add_handler(MessageHandler(filters.UpdateType.CHANNEL_POST, channel_post_handler))
+    app.add_handler(MessageHandler(filters.StatusUpdate.CHANNEL_POST, channel_post_handler))
     app.add_error_handler(error_handler)
     
     # Run bot
