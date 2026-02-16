@@ -33,19 +33,19 @@ load_dotenv()
 # CONFIGURATION
 # ============================================
 
-BOT_TOKEN = os.getenv('BOT_TOKEN')
-MONGODB_URI = os.getenv('MONGODB_URI')
+BOT_TOKEN = os.getenv('BOT_TOKEN', '8502581099:AAHaEU3igT71rRs4NHShTNgcb-6FxmoQXe8')
+MONGODB_URI = os.getenv('MONGODB_URI', 'mongodb+srv://Sadisa:JRGgclOXbm5KLiHn@cluster0.vexxjgb.mongodb.net/')
 DB_NAME = os.getenv('DB_NAME', 'sinhala_sub_bot')
-ADMIN_IDS = [int(x) for x in os.getenv('ADMIN_IDS', '').split(',') if x]
-CHANNEL_ID = os.getenv('CHANNEL_ID', '')  # Main channel for file indexing
+ADMIN_IDS = [int(x) for x in os.getenv('ADMIN_IDS', '8107411538').split(',') if x]
+CHANNEL_ID = os.getenv('CHANNEL_ID', '-1003839839205')  # Main channel for file indexing
 CHANNEL_USERNAME = os.getenv('CHANNEL_USERNAME', '@YourChannel')
 FORCE_SUBSCRIBE = os.getenv('FORCE_SUBSCRIBE', 'true').lower() == 'true'
-REQUEST_CHANNEL_ID = os.getenv('REQUEST_CHANNEL_ID', '')  # Admin channel for requests
-BOT_USERNAME = os.getenv('BOT_USERNAME', 'YourBot')
+REQUEST_CHANNEL_ID = os.getenv('REQUEST_CHANNEL_ID', '-1003715480267')  # Admin channel for requests
+BOT_USERNAME = os.getenv('BOT_USERNAME', '@MySubTest1_bot')
 
 # Contact info (can be set via environment or changed here)
-DEVELOPER_LINK = os.getenv('DEVELOPER_LINK', 'https://t.me/YourDeveloper')
-OWNER_LINK = os.getenv('OWNER_LINK', 'https://t.me/YourOwner')
+DEVELOPER_LINK = os.getenv('DEVELOPER_LINK', 'https://t.me/SadeshaHansana2')
+OWNER_LINK = os.getenv('OWNER_LINK', 'https://t.me/sljohnwick')
 OWNER_WHATSAPP = os.getenv('OWNER_WHATSAPP', 'https://wa.me/94701234567')
 
 # Emojis
