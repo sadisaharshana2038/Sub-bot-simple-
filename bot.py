@@ -1056,7 +1056,7 @@ def main():
     app.add_handler(broadcast_conv)
     app.add_handler(CallbackQueryHandler(button_callback))
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, message_handler))
-    app.add_handler(MessageHandler(filters.StatusUpdate.CHANNEL_POST, channel_post_handler))
+    app.add_handler(MessageHandler(filters.UpdateType.CHANNEL_POST, channel_post_handler))
     app.add_error_handler(error_handler)
     
     # Run bot
