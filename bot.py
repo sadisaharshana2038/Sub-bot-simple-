@@ -36,7 +36,7 @@ load_dotenv()
 
 BOT_TOKEN = os.getenv('BOT_TOKEN', '8564530553:AAG49A0pAuR9qRqyd2FDnZyd85MfE2K8w4E')
 MONGODB_URI = os.getenv('MONGODB_URI', 'mongodb+srv://Sadisa:JRGgclOXbm5KLiHn@cluster0.vexxjgb.mongodb.net/')
-DB_NAME = os.getenv('DB_NAME', 'sinhala_sub_bot')
+DB_NAME = os.getenv('DB_NAME', 'sinhala_sub_bot_OG')
 ADMIN_IDS = [int(x) for x in os.getenv('ADMIN_IDS', '8107411538,7001801397').split(',') if x]
 CHANNEL_ID = os.getenv('CHANNEL_ID', '-1003839839205')  # Main channel for file indexing
 CHANNEL_USERNAME = os.getenv('CHANNEL_USERNAME', '@YourChannel')
