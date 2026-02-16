@@ -23,18 +23,18 @@ load_dotenv()
 # CONFIGURATION
 # ============================================
 
-BOT_TOKEN = os.getenv('BOT_TOKEN')
-MONGODB_URI = os.getenv('MONGODB_URI')
+BOT_TOKEN = os.getenv('BOT_TOKEN', '8502581099:AAHaEU3igT71rRs4NHShTNgcb-6FxmoQXe8')
+MONGODB_URI = os.getenv('MONGODB_URI', 'mongodb+srv://Sadisa:JRGgclOXbm5KLiHn@cluster0.vexxjgb.mongodb.net/')
 DB_NAME = os.getenv('DB_NAME', 'sinhala_sub_bot')
-ADMIN_IDS = [int(x) for x in os.getenv('ADMIN_IDS', '').split(',') if x]
-CHANNEL_ID = os.getenv('CHANNEL_ID', '')
+ADMIN_IDS = [int(x) for x in os.getenv('ADMIN_IDS', '8107411538').split(',') if x]
+CHANNEL_ID = os.getenv('CHANNEL_ID', '-1003839839205')
 CHANNEL_USERNAME = os.getenv('CHANNEL_USERNAME', '@YourChannel')
 FORCE_SUBSCRIBE = os.getenv('FORCE_SUBSCRIBE', 'true').lower() == 'true'
 
 # Image URLs (Upload your images to Telegram first, then get the file_id or use Telegraph)
 IMAGES = {
-    'welcome': 'https://telegra.ph/file/welcome-banner.jpg',
-    'loading': 'https://telegra.ph/file/loading.gif',
+    'welcome': 'https://t.me/shprofilterupdate/300',
+    'loading': 'https://t.me/shprofilterupdate/300',
     'success': 'https://telegra.ph/file/success.jpg',
     'error': 'https://telegra.ph/file/error.jpg',
     'placeholder': 'https://telegra.ph/file/series-placeholder.jpg',
