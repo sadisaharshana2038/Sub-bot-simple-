@@ -39,7 +39,7 @@ DB_NAME = os.getenv('DB_NAME', 'sinhala_sub_bot')
 ADMIN_IDS = [int(x) for x in os.getenv('ADMIN_IDS', '8107411538').split(',') if x]
 CHANNEL_ID = os.getenv('CHANNEL_ID', '-1003839839205')  # Main channel for file indexing
 CHANNEL_USERNAME = os.getenv('CHANNEL_USERNAME', '@YourChannel')
-FORCE_SUBSCRIBE = os.getenv('FORCE_SUBSCRIBE', 'true').lower() == 'true'
+FORCE_SUBSCRIBE = os.getenv('FORCE_SUBSCRIBE', 'false').lower() == 'false'
 REQUEST_CHANNEL_ID = os.getenv('REQUEST_CHANNEL_ID', '-1003715480267')  # Admin channel for requests
 BOT_USERNAME = os.getenv('BOT_USERNAME', '@MySubTest1_bot')
 
