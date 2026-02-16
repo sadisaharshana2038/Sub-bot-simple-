@@ -23,6 +23,7 @@ from telegram.ext import (
     MessageHandler, filters, ContextTypes, ConversationHandler
 )
 from motor.motor_asyncio import AsyncIOMotorClient
+from bson.objectid import ObjectId
 from dotenv import load_dotenv
 import hashlib
 
@@ -33,27 +34,27 @@ load_dotenv()
 # CONFIGURATION
 # ============================================
 
-BOT_TOKEN = os.getenv('BOT_TOKEN', '8502581099:AAHaEU3igT71rRs4NHShTNgcb-6FxmoQXe8')
-MONGODB_URI = os.getenv('MONGODB_URI', 'mongodb+srv://Sadisa:JRGgclOXbm5KLiHn@cluster0.vexxjgb.mongodb.net/')
+BOT_TOKEN = os.getenv('BOT_TOKEN')
+MONGODB_URI = os.getenv('MONGODB_URI')
 DB_NAME = os.getenv('DB_NAME', 'sinhala_sub_bot')
-ADMIN_IDS = [int(x) for x in os.getenv('ADMIN_IDS', '8107411538,7001801397').split(',') if x]
-CHANNEL_ID = os.getenv('CHANNEL_ID', '-1003839839205')  # Main channel for file indexing
+ADMIN_IDS = [int(x) for x in os.getenv('ADMIN_IDS', '').split(',') if x]
+CHANNEL_ID = os.getenv('CHANNEL_ID', '')  # Main channel for file indexing
 CHANNEL_USERNAME = os.getenv('CHANNEL_USERNAME', '@YourChannel')
 FORCE_SUBSCRIBE = False  # Force subscription disabled
-REQUEST_CHANNEL_ID = os.getenv('REQUEST_CHANNEL_ID', '-1003715480267')  # Admin channel for requests
-BOT_USERNAME = os.getenv('BOT_USERNAME', '@MySubTest1_bot')
+REQUEST_CHANNEL_ID = os.getenv('REQUEST_CHANNEL_ID', '')  # Admin channel for requests
+BOT_USERNAME = os.getenv('BOT_USERNAME', 'YourBot')
 
 # Contact info
 DEVELOPER_NAME = os.getenv('DEVELOPER_NAME', 'Sadesha Hansana')
 OWNER_NAME = os.getenv('OWNER_NAME', 'Sadisa Harshana')
-DEVELOPER_LINK = os.getenv('DEVELOPER_LINK', 'https://t.me/SadeshaHansana2')
-OWNER_LINK = os.getenv('OWNER_LINK', 'https://t.me/sljohnwick')
+DEVELOPER_LINK = os.getenv('DEVELOPER_LINK', 'https://t.me/YourDeveloper')
+OWNER_LINK = os.getenv('OWNER_LINK', 'https://t.me/YourOwner')
 OWNER_WHATSAPP = os.getenv('OWNER_WHATSAPP', 'https://wa.me/94701234567')
 
 # Menu Banner Images - Upload images to Telegram and use file_id or Telegraph URLs
-BANNER_START = os.getenv('BANNER_START', 'https://t.me/shprofilterupdate/300')
-BANNER_HELP = os.getenv('BANNER_HELP', 'https://t.me/shprofilterupdate/301')
-BANNER_CONTACT = os.getenv('BANNER_CONTACT', 'https://t.me/shprofilterupdate/300')
+BANNER_START = os.getenv('BANNER_START', 'https://telegra.ph/file/d4f3e965e965e3dfb5b45.jpg')
+BANNER_HELP = os.getenv('BANNER_HELP', 'https://telegra.ph/file/d4f3e965e965e3dfb5b45.jpg')
+BANNER_CONTACT = os.getenv('BANNER_CONTACT', 'https://telegra.ph/file/d4f3e965e965e3dfb5b45.jpg')
 BANNER_SEARCH = os.getenv('BANNER_SEARCH', 'https://telegra.ph/file/d4f3e965e965e3dfb5b45.jpg')
 
 # Emojis
@@ -908,7 +909,16 @@ async def send_search_results_page(update: Update, context: ContextTypes.DEFAULT
         display_name = file_name if len(file_name) <= 45 else file_name[:42] + "..."
         
         button_text = f"📁 {display_name} ({file_size})"
-        keyboard.append([InlineKeyboardButton(button_text, callback_data=f"file_{file_data['file_id']}")])
+        
+        # Use database _id or file_unique_id as callback data (shorter than file_id)
+        db_id = str(file_data.get('_id', ''))
+        if len(db_id) > 50:
+            # If _id is too long, use file_unique_id
+            callback_id = file_data.get('file_unique_id', file_data.get('file_id', ''))[:50]
+        else:
+            callback_id = db_id
+        
+        keyboard.append([InlineKeyboardButton(button_text, callback_data=f"getfile_{callback_id}")])
     
     # Navigation buttons
     nav_buttons = []
@@ -1055,9 +1065,10 @@ Movie හෝ Series නම ටයිප් කරන්න...
             # Just answer the callback, don't do anything
             await query.answer(f"📄 පිටුව {context.user_data.get('current_page', 0) + 1}")
         
-        elif data.startswith("file_"):
-            file_id = data.replace("file_", "")
-            await send_file(update, context, file_id)
+        elif data.startswith("getfile_"):
+            # Get file using database ID or file_unique_id
+            callback_id = data.replace("getfile_", "")
+            await send_file_by_id(update, context, callback_id)
         
         elif data.startswith("approve_"):
             await handle_request_approval(update, context, True)
@@ -1081,6 +1092,103 @@ Movie හෝ Series නම ටයිප් කරන්න...
             await query.message.reply_text(
                 f"{E['error']} දෝෂයක් සිදුවිය!\n\nකරුණාකර නැවත උත්සාහ කරන්න."
             )
+        except:
+            pass
+
+async def send_file_by_id(update: Update, context: ContextTypes.DEFAULT_TYPE, callback_id: str):
+    """Send file to user using database ID or file_unique_id"""
+    query = update.callback_query
+    
+    try:
+        # Try to find file by _id first
+        from bson.objectid import ObjectId
+        file_data = None
+        
+        try:
+            # Try as ObjectId (database _id)
+            file_data = await db.db.files.find_one({'_id': ObjectId(callback_id)})
+        except:
+            pass
+        
+        # If not found, try as file_unique_id
+        if not file_data:
+            file_data = await db.db.files.find_one({'file_unique_id': callback_id})
+        
+        # If still not found, try as file_id (fallback)
+        if not file_data:
+            file_data = await db.db.files.find_one({'file_id': callback_id})
+        
+        if not file_data:
+            await query.answer(f"{E['error']} File not found!", show_alert=True)
+            return
+        
+        # Get the actual file_id for sending
+        file_id = file_data.get('file_id')
+        
+        # Create beautiful caption
+        caption = create_file_caption(
+            file_data.get('file_name', 'Unknown'),
+            file_data.get('file_size', 0)
+        )
+        
+        # Send file
+        await query.answer(f"{E['loading']} Sending file...")
+        
+        file_type = file_data.get('file_type', 'document')
+        
+        try:
+            if file_type == 'document':
+                await context.bot.send_document(
+                    chat_id=query.message.chat_id,
+                    document=file_id,
+                    caption=caption,
+                    parse_mode='Markdown'
+                )
+            elif file_type == 'video':
+                await context.bot.send_video(
+                    chat_id=query.message.chat_id,
+                    video=file_id,
+                    caption=caption,
+                    parse_mode='Markdown'
+                )
+            elif file_type == 'audio':
+                await context.bot.send_audio(
+                    chat_id=query.message.chat_id,
+                    audio=file_id,
+                    caption=caption,
+                    parse_mode='Markdown'
+                )
+            elif file_type == 'photo':
+                await context.bot.send_photo(
+                    chat_id=query.message.chat_id,
+                    photo=file_id,
+                    caption=caption,
+                    parse_mode='Markdown'
+                )
+            else:
+                # Default to document if type unknown
+                await context.bot.send_document(
+                    chat_id=query.message.chat_id,
+                    document=file_id,
+                    caption=caption,
+                    parse_mode='Markdown'
+                )
+            
+            logger.info(f"File sent: {file_data.get('file_name')} to user {query.from_user.id}")
+            
+        except Exception as send_error:
+            logger.error(f"Error sending file: {send_error}")
+            await query.message.reply_text(
+                f"{E['error']} **File එක යැවීමේදී දෝෂයක්!**\n\n"
+                f"කරුණාකර admin හා සම්බන්ධ වන්න.\n"
+                f"/contact",
+                parse_mode='Markdown'
+            )
+        
+    except Exception as e:
+        logger.error(f"Error in send_file_by_id: {e}", exc_info=True)
+        try:
+            await query.answer(f"{E['error']} Error!", show_alert=True)
         except:
             pass
 
@@ -1670,7 +1778,7 @@ def main():
     app.add_handler(broadcast_conv)
     app.add_handler(CallbackQueryHandler(button_callback))
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, message_handler))
-    app.add_handler(MessageHandler(filters.UpdateType.CHANNEL_POST, channel_post_handler))
+    app.add_handler(MessageHandler(filters.StatusUpdate.CHANNEL_POST, channel_post_handler))
     app.add_error_handler(error_handler)
     
     # Run bot
